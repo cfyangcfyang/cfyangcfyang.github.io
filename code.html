@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貪食蛇小遊戲</title>
+    <style>
+        /* CSS 內容直接放在這裡 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .game-area {
+            position: relative;
+        }
+
+        canvas {
+            background-color: #ecf0f1;
+            border: 5px solid #bdc3c7;
+            border-radius: 8px;
+        }
+
+        /* 遊戲結束和開始畫面的遮罩 */
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(44, 62, 80, 0.7);
+            color: white;
+            display: none; /* 預設隱藏 */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            text-align: center;
+            border-radius: 3px;
+        }
+        .game-overlay.show {
+            display: flex; /* 顯示遮罩 */
+        }
+        .game-overlay button {
+            font-size: 0.5em;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .game-overlay button:hover {
+            background-color: #2980b9;
+        }
+        #finalScore {
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+
+        .controls-panel, .highscore-panel {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 250px;
+            height: fit-content;
+        }
+
+        .info-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .info-item {
+            font-weight: bold;
+        }
+
+        .buttons-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .buttons-group button {
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .buttons-group button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+
+        .buttons-group button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .highscore-panel ol {
+            padding-left: 20px;
+        }
+
+        .highscore-panel li {
+            padding: 5px;
+            font-size: 1.1em;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .highscore-panel li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>貪食蛇遊戲</h1>
+    <div class="game-container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div id="gameOverScreen" class="game-overlay">
+                <div>遊戲結束!</div>
+                <div id="finalScore"></div>
+                <button id="restartFromGameOver">重新開始</button>
+            </div>
+             <div id="startScreen" class="game-overlay show">
+                <div>準備好了嗎？</div>
+                <button id="startButton">開始遊戲</button>
+            </div>
+        </div>
+        <div class="controls-panel">
+            <h2>控制面板</h2>
+            <div class="info-display">
+                <div class="info-item">分數: <span id="score">0</span></div>
+                <div class="info-item">時間: <span id="timer">0s</span></div>
+            </div>
+            <div class="buttons-group">
+                <button id="pauseButton" disabled>暫停/繼續</button>
+                <button id="restartButton" disabled>重新開始</button>
+            </div>
+             <div class="instructions">
+                <h3>遊戲說明</h3>
+                <p>使用方向鍵 (↑ ↓ ← →) 控制蛇的移動，吃到食物就會得分並變長。不要撞到牆壁或自己的身體！</p>
+            </div>
+        </div>
+         <div class="highscore-panel">
+            <h2>歷史高分榜 (Top 10)</h2>
+            <ol id="highScoreList"></ol>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript 內容直接放在這裡
+        // 1. DOM 元素獲取
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const highScoreList = document.getElementById('highScoreList');
+
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const restartButton = document.getElementById('restartButton');
+        const restartFromGameOverButton = document.getElementById('restartFromGameOver');
+
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreDisplay = document.getElementById('finalScore');
+
+        // 2. 遊戲設定與變數
+        const gridSize = 20;
+        let snake = [];
+        let food = {};
+        let direction = 'right';
+        let nextDirection = 'right';
+        let score = 0;
+        let highScores = [];
+
+        let gameInterval;
+        let timerInterval;
+        let elapsedTime = 0;
+        let isPaused = false;
+        let isGameOver = false;
+        const gameSpeed = 120; // 毫秒，數字越小速度越快
+
+        // 3. 遊戲核心功能函數
+        function initializeGame() {
+            // 初始化蛇的位置
+            snake = [{ x: 8, y: 8 }];
+            direction = 'right';
+            nextDirection = 'right';
+            
+            // 初始化分數和時間
+            score = 0;
+            elapsedTime = 0;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = '0s';
+
+            // 遊戲狀態
+            isPaused = false;
+            isGameOver = false;
+
+            // 產生食物
+            generateFood();
+
+            // 更新畫面和UI
+            draw();
+            updateButtonStates();
+            gameOverScreen.classList.remove('show');
+        }
+
+        function startGame() {
+            startScreen.classList.remove('show');
+            initializeGame();
+
+            // 啟動遊戲循環和計時器
+            gameInterval = setInterval(gameLoop, gameSpeed);
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            updateButtonStates();
+        }
+
+        function gameLoop() {
+            if (isPaused || isGameOver) return;
+
+            // 更新方向
+            direction = nextDirection;
+            
+            // 計算蛇頭新位置
+            const head = { ...snake[0] }; // 複製蛇頭
+            switch (direction) {
+                case 'up': head.y -= 1; break;
+                case 'down': head.y += 1; break;
+                case 'left': head.x -= 1; break;
+                case 'right': head.x += 1; break;
+            }
+
+            // 碰撞檢測
+            if (checkCollision(head)) {
+                endGame();
+                return;
+            }
+
+            // 將新頭加入蛇身
+            snake.unshift(head);
+
+            // 檢查是否吃到食物
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreDisplay.textContent = score;
+                generateFood();
+            } else {
+                // 沒吃到食物，移除蛇尾
+                snake.pop();
+            }
+            
+            draw();
+        }
+
+        function draw() {
+            // 清空畫布
+            ctx.fillStyle = '#ecf0f1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 繪製蛇
+            ctx.fillStyle = '#27ae60'; // 蛇身顏色
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    ctx.fillStyle = '#2ecc71'; // 蛇頭顏色
+                } else {
+                    ctx.fillStyle = '#27ae60';
+                }
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                ctx.strokeStyle = '#ecf0f1'; // 蛇身間隔
+                ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+            });
+
+            // 繪製食物
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+            ctx.strokeStyle = '#c0392b';
+            ctx.strokeRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function generateFood() {
+            while (true) {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                    y: Math.floor(Math.random() * (canvas.height / gridSize))
+                };
+                // 確保食物不會產生在蛇身上
+                if (!snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+                    break;
+                }
+            }
+        }
+
+        function checkCollision(head) {
+            // 撞牆檢測
+            if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
+                return true;
+            }
+            // 撞到自己身體檢測
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function endGame() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+
+            // 顯示遊戲結束畫面
+            finalScoreDisplay.textContent = `最終分數: ${score}`;
+            gameOverScreen.classList.add('show');
+            
+            // 更新高分榜
+            saveAndDisplayHighScores();
+            updateButtonStates();
+        }
+
+
+        // 4. 控制與UI功能
+        function handleKeyPress(e) {
+            // 當焦點在嵌入的 iframe 時才能接收到鍵盤事件
+            const key = e.key;
+            if (key === 'ArrowUp' && direction !== 'down') nextDirection = 'up';
+            else if (key === 'ArrowDown' && direction !== 'up') nextDirection = 'down';
+            else if (key === 'ArrowLeft' && direction !== 'right') nextDirection = 'left';
+            else if (key === 'ArrowRight' && direction !== 'left') nextDirection = 'right';
+        }
+
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseButton.textContent = '繼續';
+            } else {
+                pauseButton.textContent = '暫停';
+            }
+        }
+
+        function restartGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            startGame();
+        }
+
+        function updateTimer() {
+            if (!isPaused && !isGameOver) {
+                elapsedTime++;
+                timerDisplay.textContent = `${elapsedTime}s`;
+            }
+        }
+
+        function updateButtonStates() {
+            const gameHasStarted = gameInterval !== undefined;
+            pauseButton.disabled = !gameHasStarted || isGameOver;
+            restartButton.disabled = !gameHasStarted;
+        }
+
+        // 5. 高分榜功能 (使用 localStorage)
+        function loadHighScores() {
+            const storedScores = localStorage.getItem('snakeHighScores');
+            if (storedScores) {
+                highScores = JSON.parse(storedScores);
+            }
+            displayHighScores();
+        }
+
+        function saveAndDisplayHighScores() {
+            // 加入新分數
+            highScores.push(score);
+            // 排序 (由高到低)
+            highScores.sort((a, b) => b - a);
+            // 只保留前 10 名
+            highScores = highScores.slice(0, 10);
+            // 存入 localStorage
+            localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+            // 更新顯示
+            displayHighScores();
+        }
+
+        function displayHighScores() {
+            highScoreList.innerHTML = ''; // 清空列表
+            if (highScores.length === 0) {
+                highScoreList.innerHTML = '<li>尚無紀錄</li>';
+            } else {
+                highScores.forEach(s => {
+                    const li = document.createElement('li');
+                    li.textContent = `${s} 分`;
+                    highScoreList.appendChild(li);
+                });
+            }
+        }
+
+        // 6. 事件監聽
+        document.addEventListener('keydown', handleKeyPress);
+        startButton.addEventListener('click', startGame);
+        pauseButton.addEventListener('click', togglePause);
+        restartButton.addEventListener('click', restartGame);
+        restartFromGameOverButton.addEventListener('click', restartGame);
+
+        // 7. 初始載入
+        window.addEventListener('load', () => {
+            loadHighScores();
+            updateButtonStates();
+            // 自動點擊 canvas 讓鍵盤事件可以被監聽
+            canvas.focus();
+            document.body.addEventListener('click', () => canvas.focus());
+        });
+    </script>
+</body>
+</html>
