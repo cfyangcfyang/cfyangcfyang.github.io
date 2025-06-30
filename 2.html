@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顯示 2.png</title>
+    <style>
+        /* 樣式與 1.html 完全相同 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+        img {
+            max-width: 90%;
+            max-height: 80vh;
+        }
+    </style>
+</head>
+<!-- 返回功能也完全相同 -->
+<body onclick="window.history.back();">
+
+    <!-- 顯示 2.png 圖片 -->
+    <img src="2.png" alt="圖片 2">
+    
+    <p style="margin-top: 20px;">點選頁面任意處可返回上一頁。</p>
+
+</body>
+</html>
