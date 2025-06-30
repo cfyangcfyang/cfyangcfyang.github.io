@@ -3,50 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顯示 1.png (最上層)</title>
+    <title>顯示 1.png</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; 
-            background-color: #000; 
-            cursor: pointer; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
         }
 
-        /* 為了證明圖片在最上層，我們新增一個文字元素並設定較低的 z-index */
-        .hidden-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 2em;
-            z-index: 1; /* 設定堆疊順序為 1 */
+        /* 頁面中圖片的預覽樣式 */
+        #fullscreen-image {
+            max-width: 80%;
+            max-height: 70vh;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
         }
 
-        img {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw; 
-            height: 100vh; 
-            object-fit: cover; 
-            
-            /* --- 關鍵屬性 --- */
-            /* 設定一個很高的 z-index 值，確保它在所有其他元素的上方 */
-            z-index: 9999; 
+        /* 當圖片進入全螢幕模式時的樣式 */
+        #fullscreen-image:fullscreen {
+            /* 移除邊框和邊距 */
+            border: none;
+            margin: 0;
+            /* 讓圖片在不扭曲的情況下填滿螢幕 */
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain; /* 'contain' 會完整顯示圖片，'cover' 會填滿但可能裁剪 */
+            background-color: #000; /* 全螢幕時的背景色 */
+        }
+
+        /* 按鈕樣式 */
+        button, a {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
         }
     </style>
 </head>
-<body onclick="window.history.back();">
+<body>
 
-    <!-- 這段文字會被圖片覆蓋，因為它的 z-index (1) 遠小於圖片的 z-index (9999) -->
-    <div class="hidden-text">這段文字被圖片蓋住了</div>
+    <!-- 要被全螢幕的圖片 -->
+    <img id="fullscreen-image" src="1.png" alt="圖片 1">
 
-    <!-- 圖片會顯示在最上層 -->
-    <img src="1.png" alt="圖片 1">
+    <!-- 控制按鈕 -->
+    <button id="fullscreen-btn">進入全螢幕</button>
+    
+    <!-- 返回首頁的連結 -->
+    <a href="index.html">返回首頁</a>
+
+    <p style="margin-top:20px;">提示：進入全螢幕後，可隨時按 'Esc' 鍵退出。</p>
+
+    <script>
+        // 取得按鈕和圖片的元素
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const imageElement = document.getElementById('fullscreen-image');
+
+        // 為按鈕加上點擊事件監聽器
+        fullscreenBtn.addEventListener('click', () => {
+            // 檢查當前是否已經是全螢幕狀態
+            if (document.fullscreenElement) {
+                // 如果是，就退出全螢幕
+                document.exitFullscreen();
+            } else {
+                // 如果不是，就請求進入全螢幕
+                // 為了跨瀏覽器相容性，檢查不同的前綴
+                if (imageElement.requestFullscreen) {
+                    imageElement.requestFullscreen();
+                } else if (imageElement.webkitRequestFullscreen) { /* Safari */
+                    imageElement.webkitRequestFullscreen();
+                } else if (imageElement.msRequestFullscreen) { /* IE11 */
+                    imageElement.msRequestFullscreen();
+                }
+            }
+        });
+
+        // 監聽全螢幕狀態的變化，來更新按鈕文字
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '退出全螢幕';
+            } else {
+                fullscreenBtn.textContent = '進入全螢幕';
+            }
+        });
+    </script>
 
 </body>
 </html>
