@@ -3,54 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>載入 2.png</title>
+    <title>顯示 2.png</title>
     <style>
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #000; color: #fff;
-            display: flex; justify-content: center; align-items: center;
-            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
         }
-        #container {
-            width: 100%; height: 100%; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
+        img {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            cursor: pointer;
         }
-        #fullscreen-image {
-            display: none; width: 100%; height: 100%; object-fit: contain;
-        }
-        #prompt-message { font-size: 1.5em; }
     </style>
 </head>
-<body>
-    <div id="container">
-        <!-- 關鍵差異：圖片來源改為 2.png -->
-        <img id="fullscreen-image" src="2.png" alt="圖片 2">
-        <p id="prompt-message">點擊任意處以全螢幕顯示圖片</p>
-    </div>
+<body onclick="window.history.back();">
+
+    <!-- 注意：這裡的圖片來源已改為 2.png -->
+    <img src="2.png" alt="圖片 2">
+
     <script>
-        // JavaScript 部分與 1.html 完全相同
-        const container = document.getElementById('container');
-        const image = document.getElementById('fullscreen-image');
-        const promptMessage = document.getElementById('prompt-message');
-        container.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                promptMessage.style.display = 'none';
-                image.style.display = 'block';
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) { /* Safari */
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) { /* IE11 */
-                    container.msRequestFullscreen();
-                }
+        (function() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
             }
-        });
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                image.style.display = 'none';
-                promptMessage.style.display = 'block';
-            }
+        })();
+        
+        document.addEventListener('keydown', function() {
+            window.history.back();
         });
     </script>
+
 </body>
 </html>

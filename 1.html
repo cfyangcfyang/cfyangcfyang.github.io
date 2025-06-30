@@ -3,91 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>載入 1.png</title>
+    <title>顯示 1.png</title>
     <style>
+        /* 讓圖片填滿整個螢幕，並將背景設為黑色 */
         body, html {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
             overflow: hidden;
-            background-color: #000; /* 全黑背景 */
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: sans-serif;
+            background-color: #000;
         }
-
-        /* 全螢幕容器 */
-        #container {
-            width: 100%;
-            height: 100%;
-            cursor: pointer; /* 提示可以點擊 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 圖片預設隱藏 */
-        #fullscreen-image {
-            display: none;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* 完整顯示圖片，不裁剪 */
-        }
-        
-        /* 提示文字 */
-        #prompt-message {
-            font-size: 1.5em;
+        img {
+            /* 讓圖片保持長寬比填滿畫面 (多餘部分會被裁剪) */
+            width: 100vw;  /* 100% 視窗寬度 */
+            height: 100vh; /* 100% 視窗高度 */
+            object-fit: cover;
+            /* 讓滑鼠在圖片上顯示為可點擊的手指圖示 */
+            cursor: pointer;
         }
     </style>
 </head>
-<body>
+<!-- 點擊頁面任何地方 (也就是點擊圖片) 會觸發返回上一頁 -->
+<body onclick="window.history.back();">
 
-    <!-- 我們會讓這個容器進入全螢幕 -->
-    <div id="container">
-        <!-- 圖片元素，先載入但隱藏 -->
-        <img id="fullscreen-image" src="1.png" alt="圖片 1">
-        <!-- 初始的提示訊息 -->
-        <p id="prompt-message">點擊任意處以全螢幕顯示圖片</p>
-    </div>
+    <img src="1.png" alt="圖片 1">
 
     <script>
-        const container = document.getElementById('container');
-        const image = document.getElementById('fullscreen-image');
-        const promptMessage = document.getElementById('prompt-message');
+        // 當頁面載入後，自動執行這段程式碼
+        (function() {
+            const elem = document.documentElement; // 取得整個 <html> 元素
 
-        // 為整個容器加上點擊事件
-        container.addEventListener('click', () => {
-            // 只在非全螢幕狀態下才觸發
-            if (!document.fullscreenElement) {
-                // 隱藏提示文字
-                promptMessage.style.display = 'none';
-                // 顯示圖片
-                image.style.display = 'block';
-
-                // 請求進入全螢幕
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) { /* Safari */
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) { /* IE11 */
-                    container.msRequestFullscreen();
-                }
+            // --- 這是觸發全螢幕的核心 ---
+            // 檢查並呼叫瀏覽器支援的全螢幕方法
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
             }
-        });
+        })();
 
-        // 監聽全螢幕狀態的變化 (例如使用者按 Esc 退出)
-        document.addEventListener('fullscreenchange', () => {
-            // 如果退出了全螢幕
-            if (!document.fullscreenElement) {
-                // 隱藏圖片
-                image.style.display = 'none';
-                // 重新顯示提示文字
-                promptMessage.style.display = 'block';
-            }
+        // 監聽鍵盤事件，按任意鍵也可以返回
+        document.addEventListener('keydown', function() {
+            window.history.back();
         });
     </script>
+
 </body>
 </html>
