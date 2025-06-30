@@ -3,35 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顯示 1.png</title>
+    <title>顯示 1.png (全螢幕)</title>
     <style>
-        /* 讓頁面元素置中，並讓滑鼠變成可點擊的手指圖示 */
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column; /* 讓圖片和文字垂直排列 */
-            background-color: #f0f0f0;
-            cursor: pointer; /* 提示使用者這裡可以點擊 */
+            overflow: hidden; /* 隱藏任何可能出現的滾動條 */
+            background-color: #000; /* 將背景設為黑色，以防圖片有透明區域或載入延遲 */
+            cursor: pointer; /* 讓滑鼠變成可點擊的手指圖示，提示使用者 */
         }
-        /* 確保圖片不會超出螢幕範圍 */
         img {
-            max-width: 90%;
-            max-height: 80vh; /* 最大高度為螢幕高度的 80% */
+            /* 將圖片定位以覆蓋整個視窗 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw; /* 100% 的視窗寬度 (viewport width) */
+            height: 100vh; /* 100% 的視窗高度 (viewport height) */
+            
+            /* 核心屬性：
+               - cover: 保持圖片的長寬比，填滿整個容器。如果圖片比例不符，多餘的部分會被裁剪掉。
+               - contain: 保持長寬比，完整顯示圖片，可能會在上下或左右留下黑邊。
+               通常 'cover' 是您想要的全螢幕效果。
+            */
+            object-fit: cover; 
         }
     </style>
 </head>
-<!-- 核心功能：在 body 標籤上加上 onclick 事件，執行 history.back() 來返回上一頁 -->
+<!-- 點擊 body 任意處即可返回上一頁 -->
 <body onclick="window.history.back();">
-
-    <!-- 顯示 1.png 圖片 -->
+    
     <img src="1.png" alt="圖片 1">
-
-    <p style="margin-top: 20px;">點選頁面任意處可返回上一頁。</p>
 
 </body>
 </html>
