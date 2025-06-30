@@ -3,55 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顯示 2.png</title>
+    <title>載入 2.png</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background-color: #f0f0f0;
+            overflow: hidden; background-color: #000; color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            font-family: sans-serif;
+        }
+        #container {
+            width: 100%; height: 100%; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
         }
         #fullscreen-image {
-            max-width: 80%; max-height: 70vh; border: 1px solid #ccc; margin-bottom: 20px;
+            display: none; width: 100%; height: 100%; object-fit: contain;
         }
-        #fullscreen-image:fullscreen {
-            border: none; margin: 0; width: 100vw; height: 100vh;
-            object-fit: contain; background-color: #000;
-        }
-        button, a {
-            padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 5px;
-        }
+        #prompt-message { font-size: 1.5em; }
     </style>
 </head>
 <body>
-
-    <!-- 關鍵差異：圖片來源改為 2.png -->
-    <img id="fullscreen-image" src="2.png" alt="圖片 2">
-
-    <button id="fullscreen-btn">進入全螢幕</button>
-    <a href="index.html">返回首頁</a>
-    <p style="margin-top:20px;">提示：進入全螢幕後，可隨時按 'Esc' 鍵退出。</p>
-
+    <div id="container">
+        <!-- 關鍵差異：圖片來源改為 2.png -->
+        <img id="fullscreen-image" src="2.png" alt="圖片 2">
+        <p id="prompt-message">點擊任意處以全螢幕顯示圖片</p>
+    </div>
     <script>
         // JavaScript 部分與 1.html 完全相同
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const imageElement = document.getElementById('fullscreen-image');
-        fullscreenBtn.addEventListener('click', () => {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            } else {
-                if (imageElement.requestFullscreen) {
-                    imageElement.requestFullscreen();
-                } else if (imageElement.webkitRequestFullscreen) { /* Safari */
-                    imageElement.webkitRequestFullscreen();
-                } else if (imageElement.msRequestFullscreen) { /* IE11 */
-                    imageElement.msRequestFullscreen();
+        const container = document.getElementById('container');
+        const image = document.getElementById('fullscreen-image');
+        const promptMessage = document.getElementById('prompt-message');
+        container.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                promptMessage.style.display = 'none';
+                image.style.display = 'block';
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) { /* Safari */
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) { /* IE11 */
+                    container.msRequestFullscreen();
                 }
             }
         });
         document.addEventListener('fullscreenchange', () => {
-            fullscreenBtn.textContent = document.fullscreenElement ? '退出全螢幕' : '進入全螢幕';
+            if (!document.fullscreenElement) {
+                image.style.display = 'none';
+                promptMessage.style.display = 'block';
+            }
         });
     </script>
-
 </body>
 </html>
