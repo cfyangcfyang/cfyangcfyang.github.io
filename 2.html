@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顯示 2.png (全螢幕)</title>
+    <title>顯示 2.png (最上層)</title>
     <style>
         body, html {
             margin: 0;
@@ -14,6 +14,17 @@
             background-color: #000; 
             cursor: pointer; 
         }
+        
+        .hidden-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            z-index: 1; 
+        }
+
         img {
             position: fixed;
             top: 0;
@@ -21,11 +32,16 @@
             width: 100vw; 
             height: 100vh; 
             object-fit: cover; 
+            
+            /* --- 關鍵屬性 --- */
+            z-index: 9999; 
         }
     </style>
 </head>
 <body onclick="window.history.back();">
-    
+
+    <div class="hidden-text">這段文字被圖片蓋住了</div>
+
     <!-- 注意：這裡的圖片來源是 2.png -->
     <img src="2.png" alt="圖片 2">
 
