@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red.png</title>
+    <style>
+        /* 讓圖片填滿整個螢幕，並將背景設為黑色 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        img {
+            /* 讓圖片保持長寬比填滿畫面 (多餘部分會被裁剪) */
+            width: 100vw;  /* 100% 視窗寬度 */
+            height: 100vh; /* 100% 視窗高度 */
+            object-fit: cover;
+            /* 讓滑鼠在圖片上顯示為可點擊的手指圖示 */
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="Red.png" alt="Red">
+
+    <script>
+        // 取得整個 <html> 元素
+        const elem = document.documentElement;
+        // 設置一個旗標來判斷是否已經進入全螢幕
+        let isFullScreen = false;
+
+        // --- 這是觸發全螢幕的核心函式 ---
+        function enterFullScreen() {
+            // 檢查並呼叫瀏覽器支援的全螢幕方法
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // --- 這是返回上一頁的函式 ---
+        function goBack() {
+            // 在某些瀏覽器中，導航前最好先退出全螢幕模式，雖然直接導航通常也能正常運作
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+            // 導航回 index.html
+            window.location.href = 'index.html';
+        }
+
+        // --- 主要的事件監聽邏輯 ---
+
+        // 監聽點擊事件
+        document.body.addEventListener('click', function() {
+            if (!isFullScreen) {
+                // 如果尚未進入全螢幕，則第一次點擊時進入全螢幕
+                enterFullScreen();
+                isFullScreen = true; // 將旗標設為 true
+            } else {
+                // 如果已經在全螢幕模式，則第二次點擊時返回上一頁
+                goBack();
+            }
+        });
+
+        // 監聽鍵盤事件，按任意鍵也可以返回
+        document.addEventListener('keydown', goBack);
+
+        // 監聽瀏覽器全螢幕狀態的變化 (例如使用者按 ESC 鍵退出)
+        // 這能確保 isFullScreen 旗標的狀態正確
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                isFullScreen = false;
+            }
+        });
+        document.addEventListener('webkitfullscreenchange', () => { // for Safari
+            if (!document.webkitFullscreenElement) {
+                isFullScreen = false;
+            }
+        });
+
+    </script>
+
+</body>
+</html>
